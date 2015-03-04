@@ -120,14 +120,12 @@ def pipe(netapi, node=None, sheaf="default", **params):
     cat = 0.0
     exp = 0.0
 
-    gen_cutoff = netapi.get_modulator("emo_securing_rate") / 5
-
     if node.get_slot("gen").get_activation(sheaf) == 0:                    # only add to loop when not already in it
         gen += node.get_slot("sur").get_activation(sheaf)
         gen += node.get_slot("exp").get_activation(sheaf)
     else:
         gen += node.get_slot("gen").get_activation(sheaf)
-        if abs(gen) < gen_cutoff: gen = 0                                  # cut off gen loop at lower threshold
+        if abs(gen) < 0.1: gen = 0                                        # cut off gen loop at lower threshold
     if gen > 1: gen = 1
     if gen < -1: gen = -1
 
@@ -141,7 +139,7 @@ def pipe(netapi, node=None, sheaf="default", **params):
 
     sur += node.get_slot("sur").get_activation(sheaf)
     if sur == 0: sur += node.get_slot("sur").get_activation("default")      # no activation in our sheaf, maybe from sensors?
-    if abs(node.get_slot("gen").get_activation(sheaf)) > (gen_cutoff * 2):  # cut off sur-reports from gen looping before the loop fades away
+    if abs(node.get_slot("gen").get_activation(sheaf)) > 0.2:               # cut off sur-reports from gen looping before the loop fades away
         sur += 1 if node.get_slot("gen").get_activation(sheaf) > 0 else -1
     sur += node.get_slot("exp").get_activation(sheaf)
 
